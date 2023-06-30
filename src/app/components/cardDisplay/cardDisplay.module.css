@@ -1,0 +1,117 @@
+.card {
+  padding: 1rem 1rem;
+  border-radius: var(--border-radius);
+  background: rgba(var(--card-rgb), 0.1);
+  border: 1px solid;
+  overflow: hidden;
+}
+
+.cardheader {
+  display: inline-flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  column-gap: 2rem;
+  width: 100%;
+}
+
+.cardbody {
+  overflow: hidden;
+}
+
+.animate__animated .animate__bounce {
+  --animate-duration: 2s;
+}
+
+.card:hover {
+  animation: shake 500ms ease-in-out forwards;
+}
+
+.card span,
+.card p {
+  display: inline-block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card h2 {
+  font-weight: 600;
+  padding-bottom: 0.7rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.form {
+  display: inline-flex;
+  flex-direction: column;
+  row-gap: 1rem;
+  width: 100%;
+}
+
+.searchForm {
+  width: 50%;
+}
+
+.formfield {
+  width: 100%;
+  display: inline-flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 1rem;
+  border: 1px solid;
+  border-radius: var(--border-radius);
+  background: rgba(var(--card-rgb), 0.1);
+}
+
+.input {
+  font-size: large;
+  outline: none;
+  border: none;
+  background: transparent;
+}
+
+.input::-webkit-input-placeholder {
+  /* Chrome/Opera/Safari */
+  color: var(--placeholder-color);
+}
+.input::-moz-placeholder {
+  /* Firefox 19+ */
+  color: var(--placeholder-color);
+}
+.input::placeholder {
+  color: var(--placeholder-color);
+}
+
+.submitButton {
+  padding: 0.5rem;
+  min-width: 150px;
+  border: 1px solid;
+  font-weight: var(--button-weight);
+  border-radius: var(--border-radius);
+  font-family: var(--font);
+  font-size: var(--font-size);
+  height: var(--height);
+  letter-spacing: var(--letter-spacing);
+}
+
+.searchButton {
+  border: none;
+  outline: none;
+}
+
+@keyframes shake {
+  0% {
+    transform: rotate(2deg);
+  }
+  50% {
+    transform: rotate(-3deg);
+  }
+  70% {
+    transform: rotate(3deg);
+  }
+
+  100% {
+    transform: rotate(0deg);
+  }
+}
