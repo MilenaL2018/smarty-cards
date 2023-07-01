@@ -1,22 +1,19 @@
 "use client";
 import { changeBackground, changeColor } from "@/redux/features/theme-slice";
+import { addCard, sortCards } from "@/redux/features/cards-slice";
 import Display from "./components/cardDisplay/cardDisplay";
 import { useDispatch, useSelector } from "react-redux";
 import { AiOutlineBgColors } from "react-icons/ai";
 import { RiDeleteBack2Line } from "react-icons/ri";
+import { useTranslation } from "react-i18next";
+import SmartyLogo from "../../public/logo.svg";
+import EmptyBox from "../../public/empty.svg";
 import Modal from "./components/Modal/modal";
 import { useEffect, useState } from "react";
 import { BlockPicker } from "react-color";
+import { LANGUAGES } from "../constants";
 import styles from "./page.module.css";
-import {
-  getCards,
-  deleteCards,
-  undomoveCard,
-  addCard,
-  editCard,
-  sortCards,
-} from "@/redux/features/cards-slice";
-import SmartyLogo from "../../public/logo.svg";
+let _ = require("lodash");
 import {
   BsMoonStars,
   BsBrightnessHigh,
@@ -28,9 +25,11 @@ import {
 export default function Home() {
   const appTheme = useSelector((state) => state.themeReducer);
   const cardStack = useSelector((state) => state.cardsReducer);
-  const [showResults, setResults] = useState(false);
   const [displayCards, setDisplay] = useState("active");
+  const [showResults, setResults] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
+  const [updateCard, setUpdate] = useState(false);
+  const { i18n, t } = useTranslation();
   const dispatch = useDispatch();
 
   const handleSubmit = (e) => {
@@ -112,6 +111,11 @@ export default function Home() {
     setResults(false);
   };
 
+  const onChangeLang = (e) => {
+    const lang_code = e.target.value;
+    i18n.changeLanguage(lang_code);
+  };
+
   useEffect(() => {
     document.body.style.background = appTheme.background;
 
@@ -119,7 +123,7 @@ export default function Home() {
 
     element.style.color = appTheme.color;
     element.style.borderColor = appTheme.color;
-  }, [appTheme, showResults]);
+  }, [appTheme, showResults, cardStack]);
 
   return (
     <div className={"app"}>
@@ -148,7 +152,7 @@ export default function Home() {
                 onClick={() => handleNavigation("active")}
                 id="home"
               >
-                Inicio
+                {t("home")}
               </li>
             )}
             <li
@@ -157,7 +161,7 @@ export default function Home() {
               onClick={() => handleNavigation("deleted")}
               id="deleted"
             >
-              Papelera
+              {t("trash")}
             </li>
             <li
               name="nav-link"
@@ -165,28 +169,67 @@ export default function Home() {
               onClick={() => handleNavigation("archived")}
               id="archived"
             >
-              Archivo
+              {t("archive")}
             </li>
           </ul>
-
+          <select
+            defaultValue={i18n.language}
+            onChange={onChangeLang}
+            className={styles.langPicker}
+            style={{ color: appTheme.color, borderColor: appTheme.color }}
+          >
+            {LANGUAGES.map(({ code, label }) => (
+              <option key={code} value={code}>
+                {label}
+              </option>
+            ))}
+          </select>
           {appTheme.background === "#ffffff" ? (
             <BsMoonStars fontSize={"1.5rem"} onClick={toggleTheme} />
           ) : (
             <BsBrightnessHigh fontSize={"1.5rem"} onClick={toggleTheme} />
           )}
-
           <AiOutlineBgColors fontSize={"2rem"} onClick={handleModal} />
 
-          {modalOpen && !editCard && (
-            <Modal
-              closeModal={() => setModalOpen(false)}
-              title={"Choose a color"}
-            >
+          {displayCards !== "deleted" && modalOpen && (
+            <Modal closeModal={handleModal} title={t("modalColorPick")}>
               <BlockPicker
                 color={appTheme.color}
                 triangle="hide"
                 onChangeComplete={handleChangeComplete}
               />
+            </Modal>
+          )}
+
+          {displayCards === "deleted" && modalOpen && (
+            <Modal closeModal={handleModal} title={""}>
+              <p>{t("deletionWarning")}</p>
+              <div
+                style={{
+                  flexDirection: "row",
+                  display: "inline-flex",
+                  columnGap: "1rem",
+                  justifyContent: "center",
+                  padding: "1rem",
+                }}
+              >
+                <button
+                  className={styles.submitButton}
+                  onClick={() => handleDelete(card)}
+                >
+                  {t("cancel")}
+                </button>
+
+                <button
+                  style={{
+                    background: appTheme.color,
+                    color: appTheme.background,
+                  }}
+                  className={styles.submitButton}
+                >
+                  {t("continue")}
+                </button>
+              </div>
             </Modal>
           )}
         </div>
@@ -205,7 +248,7 @@ export default function Home() {
                   type="text"
                   name="title"
                   className={styles.input}
-                  placeholder="Agrega un título aquí..."
+                  placeholder={t("inputNewCardTitle")}
                   style={{
                     borderColor: appTheme.color,
                     "--placeholder-color": appTheme.color,
@@ -217,7 +260,7 @@ export default function Home() {
                 <input
                   type="text"
                   name="content"
-                  placeholder="y un poco de contenido por acá."
+                  placeholder={t("inputNewCardContent")}
                   className={styles.input}
                   style={{
                     borderColor: appTheme.color,
@@ -235,7 +278,7 @@ export default function Home() {
                 }}
                 type="submit"
               >
-                Crear
+                {t("createButton")}
               </button>
             </form>
           </div>
@@ -250,7 +293,7 @@ export default function Home() {
                   name="search"
                   id="search"
                   className={styles.input}
-                  placeholder="Escribe una palabra clave"
+                  placeholder={t("searchPlaceholder")}
                   style={{
                     borderColor: appTheme.color,
                     "--placeholder-color": appTheme.color,
@@ -282,13 +325,29 @@ export default function Home() {
             />
           </div>
 
-          {showResults ? (
-            <Display handleModal={handleModal} cardStack={showResults} />
+          {_.isEmpty(cardStack) ? (
+            <div className={styles.emptyBox}>
+              <EmptyBox
+                style={{ color: appTheme.color }}
+                className={styles.emptyImage}
+              />
+              <h2>{t("firstCardTitle")}</h2>
+            </div>
           ) : (
-            <Display
-              handleModal={handleModal}
-              cardStack={cardStack.filter((card) => card.tag === displayCards)}
-            />
+            <>
+              {showResults ? (
+                <Display handleModal={handleModal} cardStack={showResults} />
+              ) : (
+                <Display
+                  handleModal={handleModal}
+                  updateCard={updateCard}
+                  setUpdate={setUpdate}
+                  cardStack={cardStack.filter(
+                    (card) => card.tag === displayCards
+                  )}
+                />
+              )}
+            </>
           )}
         </div>
       </div>

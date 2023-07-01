@@ -1,5 +1,7 @@
+"use client"
 import { ReduxProvider } from "@/redux/provider";
 import "./globals.css";
+import "../i18n";
 
 export const metadata = {
   title: "Smarty Cards",

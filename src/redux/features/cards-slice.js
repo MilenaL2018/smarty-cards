@@ -1,36 +1,18 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { uid } from "uid";
 
-const initialState = [
-  {
-    uid: uid(),
-    title: "Tarjeta de prueba",
-    content: "Aquí aparecerán tus notas.",
-    tag: "active",
-  },
-];
+const initialState = [];
 
 export const cards = createSlice({
   name: "cards",
   initialState: initialState,
   reducers: {
-    getCards: (state, payload) => {
-      return state.filter((card) => card.tag === payload.payload);
-    },
-    empyTrash: () => {
-      let updateStack = state.filter((card) => card.tag !== "deleted");
-      return updateStack;
-    },
     addCard: (state, payload) => {
       state.push({ uid: uid(), ...payload.payload });
     },
     editCard: (state, payload) => {
       const index = state.findIndex((card) => card.uid === payload.payload.uid);
       state[index] = { ...payload.payload };
-    },
-    undoDeleteCard: (state, payload) => {
-      let restoredCard = state.find((card) => card.uid === payload.payload.uid);
-      if (restoredCard) return state.push(restoredCard);
     },
     findCard: (state, payload) => {
       let filterByTitle = state.filter(
@@ -46,14 +28,26 @@ export const cards = createSlice({
       }
       return state;
     },
+    empyTrash: () => {
+      let updateStack = state.filter((card) => card.tag !== "deleted");
+      return updateStack;
+    },
+    deleteCard: (state, payload) => {
+      return state.filter((card) => card.uid !== payload.payload.uid);
+    },
+    undoDeleteCard: (state, payload) => {
+      let restoredCard = state.find((card) => card.uid === payload.payload.uid);
+      if (restoredCard) return state.push(restoredCard);
+    },
   },
 });
 
 export const {
   getCards,
-  deleteCards,
+  empyTrash,
+  deleteCard,
   addCard,
-  undomoveCard,
+  undoDeleteCard,
   editCard,
   findCard,
   sortCards,
