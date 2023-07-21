@@ -24,8 +24,9 @@ i18n.use(initReactI18next).init({
         firstCardTitle: "Mmm, seems like there is nothing here.",
         cancel: "Cancel",
         continue: "Continue",
-        deletionWarning:
-          "Once deleted, you can not have it back. Do you still want to continue?",
+        deletionWarning: "Once deleted, you can not have it back.",
+        incompleteFields: "Mind not to leave empty fields, please.",
+        missingKeyWord: "Write a key word to do a search."
       },
     },
     es: {
@@ -42,8 +43,9 @@ i18n.use(initReactI18next).init({
         firstCardTitle: "Mmm, parece que no hay nada por aquí.",
         cancel: "Cancelar",
         continue: "Continuar",
-        deletionWarning:
-          "La operación que estás por realizar es destructiva. ¿Estás seguro/a que quieres eliminar esta tarjeta?",
+        deletionWarning: "Una vez eliminada, no podrás recuperarla.",
+        incompleteFields: 'Por favor, no dejes espacios vacíos.',
+        missingKeyWord: "Escribe una palabra para hacer la búsqueda."
       },
     },
   },

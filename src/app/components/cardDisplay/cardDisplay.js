@@ -1,4 +1,5 @@
-import { editCard, deleteCard } from "@/redux/features/cards-slice";
+import { editCard } from "@/redux/features/cards-slice";
+import { displayHandler } from "@/redux/features/snackbar-slice";
 import { BiArchiveOut, BiArchiveIn } from "react-icons/bi";
 import { BsCheckSquare, BsPencil } from "react-icons/bs";
 import { MdOutlineRestorePage } from "react-icons/md";
@@ -6,7 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { AiOutlineDelete } from "react-icons/ai";
 import styles from "./cardDisplay.module.css";
 
-function Display({ cardStack, updateCard, setUpdate, handleModal }) {
+function Display({ cardStack, updateCard, setUpdate, openModal }) {
   const appTheme = useSelector((state) => state.themeReducer);
   const dispatch = useDispatch();
 
@@ -15,7 +16,7 @@ function Display({ cardStack, updateCard, setUpdate, handleModal }) {
   };
 
   const handleDelete = (card) => {
-    dispatch(deleteCard(card));
+    dispatch(displayHandler({ msg: 'Hello', id: card.id}));
   };
 
   const handleSubmit = (e) => {
@@ -32,13 +33,14 @@ function Display({ cardStack, updateCard, setUpdate, handleModal }) {
 
   return cardStack.map((card) => {
     return (
-      <div className={styles.card} key={card.uid}>
+      <div className={styles.card} key={card.id}>
         <div className={styles.cardheader}>
           <AiOutlineDelete
             fontSize={"1.5rem"}
+            data-modal="modal-two"
             onClick={() => {
               if (card.tag === "deleted") {
-                handleModal();
+                handleDelete(card);
               } else {
                 handleEdit({ ...card, tag: "deleted" });
               }

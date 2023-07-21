@@ -8,10 +8,10 @@ export const cards = createSlice({
   initialState: initialState,
   reducers: {
     addCard: (state, payload) => {
-      state.push({ uid: uid(), ...payload.payload });
+      state.push({ id: uid(), ...payload.payload });
     },
     editCard: (state, payload) => {
-      const index = state.findIndex((card) => card.uid === payload.payload.uid);
+      const index = state.findIndex((card) => card.id === payload.payload.id);
       state[index] = { ...payload.payload };
     },
     findCard: (state, payload) => {
@@ -33,12 +33,8 @@ export const cards = createSlice({
       return updateStack;
     },
     deleteCard: (state, payload) => {
-      return state.filter((card) => card.uid !== payload.payload.uid);
-    },
-    undoDeleteCard: (state, payload) => {
-      let restoredCard = state.find((card) => card.uid === payload.payload.uid);
-      if (restoredCard) return state.push(restoredCard);
-    },
+      return state.filter((card) => card.id !== payload.payload);
+    }
   },
 });
 
@@ -47,7 +43,6 @@ export const {
   empyTrash,
   deleteCard,
   addCard,
-  undoDeleteCard,
   editCard,
   findCard,
   sortCards,

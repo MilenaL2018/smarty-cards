@@ -1,19 +1,18 @@
 "use client";
-import { changeBackground, changeColor } from "@/redux/features/theme-slice";
+
+//Redux
 import { addCard, sortCards } from "@/redux/features/cards-slice";
-import Display from "./components/cardDisplay/cardDisplay";
+import { changeBackground } from "@/redux/features/theme-slice";
 import { useDispatch, useSelector } from "react-redux";
+
+//Components
+import Display from "./components/cardDisplay/cardDisplay";
+import ModalManager from "./components/Modal/modalManager";
+import Snackbar from "./components/SnackBar/snackbar";
+
+//Icons
 import { AiOutlineBgColors } from "react-icons/ai";
 import { RiDeleteBack2Line } from "react-icons/ri";
-import { useTranslation } from "react-i18next";
-import SmartyLogo from "../../public/logo.svg";
-import EmptyBox from "../../public/empty.svg";
-import Modal from "./components/Modal/modal";
-import { useEffect, useState } from "react";
-import { BlockPicker } from "react-color";
-import { LANGUAGES } from "../constants";
-import styles from "./page.module.css";
-let _ = require("lodash");
 import {
   BsMoonStars,
   BsBrightnessHigh,
@@ -22,29 +21,47 @@ import {
   BsSearch,
 } from "react-icons/bs";
 
+//Logos
+import SmartyLogo from "../../public/logo.svg";
+import EmptyBox from "../../public/empty.svg";
+
+import { useEffect, useState } from "react";
+
+//Language config
+import { useTranslation } from "react-i18next";
+import { LANGUAGES } from "../constants";
+import styles from "./page.module.css";
+
+//Utils
+let _ = require("lodash");
+
 export default function Home() {
   const appTheme = useSelector((state) => state.themeReducer);
   const cardStack = useSelector((state) => state.cardsReducer);
+  const snackbar = useSelector((state) => state.snackBarReducer);
+
   const [displayCards, setDisplay] = useState("active");
   const [showResults, setResults] = useState(false);
-  const [modalOpen, setModalOpen] = useState(false);
   const [updateCard, setUpdate] = useState(false);
+  const [formValid, setValid] = useState(true);
+  const [missingKey, setMissing] = useState(true);
   const { i18n, t } = useTranslation();
   const dispatch = useDispatch();
 
   const handleSubmit = (e) => {
     e.preventDefault();
     let card = Object.fromEntries(new FormData(e.target).entries());
-
-    if (Object.values(card).some((value) => value === "")) {
-      alert("¡No dejes espacios vacíos!");
+    console.log(card)
+    /* if (Object.values(card).some((value) => value === "")) {
+      setValid(false);
     } else {
       dispatch(addCard({ ...card, tag: "active" }));
+      setValid(true);
       let inputs = document.getElementsByTagName("input");
       for (let input of inputs) {
         input.value = "";
       }
-    }
+    } */
   };
 
   const handleNavigation = (param) => {
@@ -66,16 +83,26 @@ export default function Home() {
     }
   };
 
-  const handleModal = () => {
-    setModalOpen(!modalOpen);
+  //Modal Controls
+  const [modalOpen, setModal] = useState(false);
+
+  const openModal = (event) => {
+    event.preventDefault();
+
+    const {
+      target: {
+        dataset: { modal },
+      },
+    } = event;
+    if (modal) setModal(modal);
+  };
+
+  const closeModal = () => {
+    setModal("");
   };
 
   const toggleTheme = () => {
     dispatch(changeBackground());
-  };
-
-  const handleChangeComplete = (color) => {
-    dispatch(changeColor(color.hex));
   };
 
   const handleSort = (order) => {
@@ -86,7 +113,7 @@ export default function Home() {
     let keyword = document.getElementById("search").value;
 
     if (keyword === "") {
-      alert("¡Ingresa una palabra clave!");
+      setMissing(false);
     } else {
       let filterCards = [];
       let searchKey = keyword.toLowerCase();
@@ -101,6 +128,7 @@ export default function Home() {
           filterCards.push(card);
         }
       });
+      setMissing(true);
       setResults(filterCards);
     }
   };
@@ -123,10 +151,12 @@ export default function Home() {
 
     element.style.color = appTheme.color;
     element.style.borderColor = appTheme.color;
-  }, [appTheme, showResults, cardStack]);
+  }, [appTheme, showResults, snackbar.isDisplayed]);
 
   return (
     <div className={"app"}>
+      <ModalManager closeFn={closeModal} modal={modalOpen} />
+
       <div className={styles.appbar}>
         <div className={styles.left}>
           <SmartyLogo
@@ -172,6 +202,7 @@ export default function Home() {
               {t("archive")}
             </li>
           </ul>
+
           <select
             defaultValue={i18n.language}
             onChange={onChangeLang}
@@ -184,57 +215,20 @@ export default function Home() {
               </option>
             ))}
           </select>
+
           {appTheme.background === "#ffffff" ? (
             <BsMoonStars fontSize={"1.5rem"} onClick={toggleTheme} />
           ) : (
             <BsBrightnessHigh fontSize={"1.5rem"} onClick={toggleTheme} />
           )}
-          <AiOutlineBgColors fontSize={"2rem"} onClick={handleModal} />
 
-          {displayCards !== "deleted" && modalOpen && (
-            <Modal closeModal={handleModal} title={t("modalColorPick")}>
-              <BlockPicker
-                color={appTheme.color}
-                triangle="hide"
-                onChangeComplete={handleChangeComplete}
-              />
-            </Modal>
-          )}
-
-          {displayCards === "deleted" && modalOpen && (
-            <Modal closeModal={handleModal} title={""}>
-              <p>{t("deletionWarning")}</p>
-              <div
-                style={{
-                  flexDirection: "row",
-                  display: "inline-flex",
-                  columnGap: "1rem",
-                  justifyContent: "center",
-                  padding: "1rem",
-                }}
-              >
-                <button
-                  className={styles.submitButton}
-                  onClick={() => handleDelete(card)}
-                >
-                  {t("cancel")}
-                </button>
-
-                <button
-                  style={{
-                    background: appTheme.color,
-                    color: appTheme.background,
-                  }}
-                  className={styles.submitButton}
-                >
-                  {t("continue")}
-                </button>
-              </div>
-            </Modal>
-          )}
+          <AiOutlineBgColors
+            fontSize={"2rem"}
+            onClick={openModal}
+            data-modal="modal-one"
+          />
         </div>
       </div>
-
       <div className={styles.main}>
         {displayCards === "active" && (
           <div className={styles.sidebar}>
@@ -247,6 +241,7 @@ export default function Home() {
                 <input
                   type="text"
                   name="title"
+                  id='title-input'
                   className={styles.input}
                   placeholder={t("inputNewCardTitle")}
                   style={{
@@ -260,6 +255,7 @@ export default function Home() {
                 <input
                   type="text"
                   name="content"
+                  id='content-input'
                   placeholder={t("inputNewCardContent")}
                   className={styles.input}
                   style={{
@@ -269,6 +265,12 @@ export default function Home() {
                   }}
                 />
               </div>
+
+              {!formValid && (
+                <span className={styles.formError}>
+                  {t("incompleteFields")}
+                </span>
+              )}
 
               <button
                 className={styles.submitButton}
@@ -304,25 +306,29 @@ export default function Home() {
                   <RiDeleteBack2Line
                     color={appTheme.color}
                     onClick={handleResetSearch}
-                    fontSize={"1.5rem"}
                   />
                 ) : (
                   <BsSearch color={appTheme.color} onClick={handleSearch} />
                 )}
               </div>
+
+              {!missingKey && (
+                <span className={styles.formError}>{t("missingKeyWord")}</span>
+              )}
             </div>
 
-            <BsSortAlphaDownAlt
-              color={appTheme.color}
-              fontSize={"2rem"}
-              onClick={() => handleSort("ZA")}
-            />
-
-            <BsSortAlphaDown
-              color={appTheme.color}
-              fontSize={"2rem"}
-              onClick={() => handleSort("AZ")}
-            />
+            <div className={styles.filters}>
+              <BsSortAlphaDownAlt
+                color={appTheme.color}
+                fontSize={"30px"}
+                onClick={() => handleSort("ZA")}
+              />
+              <BsSortAlphaDown
+                color={appTheme.color}
+                fontSize={"30px"}
+                onClick={() => handleSort("AZ")}
+              />
+            </div>
           </div>
 
           {_.isEmpty(cardStack) ? (
@@ -331,15 +337,15 @@ export default function Home() {
                 style={{ color: appTheme.color }}
                 className={styles.emptyImage}
               />
-              <h2>{t("firstCardTitle")}</h2>
+              <span>{t("firstCardTitle")}</span>
             </div>
           ) : (
             <>
               {showResults ? (
-                <Display handleModal={handleModal} cardStack={showResults} />
+                <Display openModal={openModal} cardStack={showResults} />
               ) : (
                 <Display
-                  handleModal={handleModal}
+                  openModal={openModal}
                   updateCard={updateCard}
                   setUpdate={setUpdate}
                   cardStack={cardStack.filter(
@@ -351,6 +357,7 @@ export default function Home() {
           )}
         </div>
       </div>
+      {snackbar.isDisplayed && <Snackbar />}
     </div>
   );
 }

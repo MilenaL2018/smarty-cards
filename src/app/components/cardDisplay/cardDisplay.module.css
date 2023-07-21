@@ -1,9 +1,12 @@
 .card {
-  padding: 1rem 1rem;
+  padding: 1rem;
+  margin: 4px;
   border-radius: var(--border-radius);
   background: rgba(var(--card-rgb), 0.1);
   border: 1px solid;
   overflow: hidden;
+  min-width: 240px;
+  width: 60%;
 }
 
 .cardheader {
@@ -47,21 +50,6 @@
   flex-direction: column;
   row-gap: 1rem;
   width: 100%;
-}
-
-.searchForm {
-  width: 50%;
-}
-
-.formfield {
-  width: 100%;
-  display: inline-flex;
-  flex-direction: row;
-  justify-content: space-between;
-  padding: 1rem;
-  border: 1px solid;
-  border-radius: var(--border-radius);
-  background: rgba(var(--card-rgb), 0.1);
 }
 
 .input {

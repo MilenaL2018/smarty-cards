@@ -1,4 +1,4 @@
-import style from "./modal.module.css";
+/* import style from "./modal.module.css";
 import { BsXLg } from "react-icons/bs";
 import Backdrop from "./backDrop";
 
@@ -15,5 +15,26 @@ function Modal({ title, children, closeModal }) {
     </Backdrop>
   );
 }
+
+export default Modal; */
+
+import { createPortal } from "react-dom";
+import { useEffect, useState } from "react";
+import style from "./modal.module.css";
+
+const Modal = ({ children, open = false }) => {
+  const [domReady, setDomReady] = useState(false);
+
+  useEffect(() => {
+    setDomReady(true);
+  }, []);
+
+  if (!open) return null;
+
+  return createPortal(
+    <div className={style.backdrop}>{children}</div>,
+    document.getElementById("modal-root")
+  );
+};
 
 export default Modal;

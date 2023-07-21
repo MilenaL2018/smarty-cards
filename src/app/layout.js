@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { ReduxProvider } from "@/redux/provider";
 import "./globals.css";
 import "../i18n";
@@ -19,10 +19,9 @@ export default function RootLayout({ children }) {
       </head>
 
       <body suppressHydrationWarning={true}>
-        <ReduxProvider>
-          {children}
-          <div id="portal"></div>
-        </ReduxProvider>
+        <div id="modal-root"></div>
+        <ReduxProvider>{children}</ReduxProvider>
+        <div id="snackbar__root"></div>
       </body>
     </html>
   );
